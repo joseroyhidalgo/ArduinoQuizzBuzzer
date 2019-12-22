@@ -29,17 +29,24 @@ const int ledPin =  11;      // the number of the LED pin
 const int buttonPin2 = 2;     // the number of the pushbutton pin
 const int ledPin2 =  12;      // the number of the LED pin
 
+const int buttonPin3 = 6;     // the number of the pushbutton pin
+const int ledPin3 =  10;      // the number of the LED pin
+
+const int buttonPinGo = 7;
 const int ledGo =  5;
 
 // variables will change:
 int buttonState = 0;         // variable for reading the pushbutton status
 int buttonState2 = 0; 
+int buttonState3 = 0; 
+int buttonStateGo = 0; 
 
 const int soundPin = 3;
 long randNumber = 0;
 int ledGoState = false;
 int ledPinState = true;
 int ledPin2State = true;
+int ledPin3State = true;
 
 unsigned long currentMillis;
 unsigned long randomDelay;
@@ -93,6 +100,28 @@ int tempo2[] = {
   5
 };
 
+int melody3[] = {
+  NOTE_G4, NOTE_G4, NOTE_G4,NOTE_G4,
+  NOTE_G4, NOTE_G4, NOTE_G4,NOTE_G4,
+  NOTE_G4, NOTE_G4, NOTE_G4,NOTE_G4,
+  NOTE_G4, NOTE_G4, NOTE_G4,NOTE_G4,
+  NOTE_G4, 
+  0, NOTE_G4, NOTE_G4, NOTE_G4,
+  NOTE_G4, NOTE_G4, NOTE_G4, NOTE_G4,
+  NOTE_G4
+};
+//Mario main them tempo
+int tempo3[] = {
+  8, 13, 12, 9,
+  8, 13, 12, 9,
+  8, 13, 12, 9,
+  8, 13, 12, 9,
+  8,
+  5, 5, 13, 12,
+  5, 5, 13, 12,
+  5
+};
+
 void setup() {
   // initialize the LED pin as an output:
   pinMode(ledPin, OUTPUT);
@@ -104,8 +133,14 @@ void setup() {
   // initialize the pushbutton pin as an input:
   pinMode(buttonPin2, INPUT);
   
+  // initialize the LED pin as an output:
+  pinMode(ledPin3, OUTPUT);
+  // initialize the pushbutton pin as an input:
+  pinMode(buttonPin3, INPUT);
+  
   pinMode(soundPin, OUTPUT);
   pinMode(ledGo, OUTPUT);
+  pinMode(buttonPinGo, INPUT);
   
   Serial.begin(9600);
   randomSeed(analogRead(0));
@@ -123,6 +158,8 @@ void loop() {
   // read the state of the pushbutton value:
   buttonState = digitalRead(buttonPin);
   buttonState2 = digitalRead(buttonPin2);
+  buttonState3 = digitalRead(buttonPin3);
+  buttonStateGo = digitalRead(buttonPinGo);
   currentMillis = millis();
   
 //  if (buttonState2 == HIGH) {
@@ -134,7 +171,8 @@ void loop() {
 //    Serial.println("randNumber=");
 //    Serial.println(randomDelay);
 //  }
-  ledGoState = currentMillis > randomDelay ? true : false;
+//ledGoState = currentMillis > randomDelay ? true : false;
+  ledGoState =  buttonStateGo == HIGH ? true : false;
   
   digitalWrite(ledGo, ledGoState ? HIGH : LOW);
   
@@ -144,23 +182,35 @@ void loop() {
   if (buttonState == HIGH && ledGoState && ledPinState ) {
     ledPinState = true;
     ledPin2State = false;
+    ledPin3State = false;
     pinWin(1);
   } else if(buttonState == HIGH && !ledGoState) {
     ledPinState = false;
-    ledPin2State = true;
     digitalWrite(ledPin, LOW);
   }
 
   // check if the pushbutton is pressed. If it is, the buttonState is HIGH:
-  if (buttonState2 == HIGH && ledGoState && ledPin2State) {
+  else if (buttonState2 == HIGH && ledGoState && ledPin2State) {
     ledPinState = false;
     ledPin2State = true;
+    ledPin3State = false;
     pinWin(2);
   } else if(buttonState2 == HIGH && !ledGoState) {
-    ledPinState = true;
     ledPin2State = false;
     digitalWrite(ledPin2, LOW);
   }
+  
+  // check if the pushbutton is pressed. If it is, the buttonState is HIGH:
+  else if (buttonState3 == HIGH && ledGoState && ledPin3State) {
+    ledPinState = false;
+    ledPin2State = false;
+    ledPin3State = true;
+    pinWin(3);
+  } else if(buttonState3 == HIGH && !ledGoState) {
+    ledPin3State = false;
+    digitalWrite(ledPin3, LOW);
+  }
+
 }
 
 void sing() {
@@ -201,6 +251,25 @@ void sing2() {
   } 
 }
 
+void sing3() {
+  int i = 1;
+  int repeat = 1;
+  while( i <= repeat ){
+    int size = sizeof(melody3) / sizeof(int);
+    for (int thisNote = 0; thisNote < size; thisNote++) {
+      int noteDuration = 1000 / tempo3[thisNote];
+
+      buzz(soundPin, melody3[thisNote] * i/repeat, noteDuration);
+      int pauseBetweenNotes = noteDuration * 1.30;
+      delay(pauseBetweenNotes);
+      // stop the tone playing:
+      buzz(soundPin, 0, noteDuration);
+    }
+    i = i+1;
+    delay(700);
+  } 
+}
+
 void buzz(int targetPin, long frequency, long length) {
   long delayValue = 1000000 / frequency / 2; // calculate the delay value between transitions
   long numCycles = frequency * length / 1000; // calculate the number of cycles for proper timing
@@ -217,7 +286,7 @@ void pinWin(int s){
   digitalWrite(ledPin, ledPinState ? HIGH : LOW);
   digitalWrite(ledPin2, ledPin2State ? HIGH : LOW);
   
-  s==1?sing():sing2();
+  s==1?sing():s==2?sing2():sing3();
   delay(5000);
   
   ledGoState = 0;
