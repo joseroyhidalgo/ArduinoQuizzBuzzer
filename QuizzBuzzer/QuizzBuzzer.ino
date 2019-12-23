@@ -58,11 +58,14 @@ void(* resetFunc) (void) = 0;//declare reset function at address 0
 #define NOTE_G6  1568
 
 #define NOTE_G4  392
+#define NOTE_G5  783
+#define NOTE_A4  440
+#define NOTE_B4  493
 #define NOTE_C4  262
 #define NOTE_DS4 311
 #define NOTE_F4  349
 #define NOTE_E4  330
-#define NOTE_D4  294
+#define NOTE_D4  293
 
 int melody[] = {
   NOTE_E7, NOTE_E7, 0, NOTE_E7,
@@ -101,25 +104,28 @@ int tempo2[] = {
 };
 
 int melody3[] = {
-  NOTE_G4, NOTE_G4, NOTE_G4,NOTE_G4,
-  NOTE_G4, NOTE_G4, NOTE_G4,NOTE_G4,
-  NOTE_G4, NOTE_G4, NOTE_G4,NOTE_G4,
-  NOTE_G4, NOTE_G4, NOTE_G4,NOTE_G4,
-  NOTE_G4, 
-  0, NOTE_G4, NOTE_G4, NOTE_G4,
-  NOTE_G4, NOTE_G4, NOTE_G4, NOTE_G4,
-  NOTE_G4
+  NOTE_G4, NOTE_G4, NOTE_A4,
+  NOTE_G4, NOTE_C4, NOTE_B4,
+  NOTE_G4, NOTE_G4, NOTE_A4,
+  NOTE_G4, NOTE_D4, NOTE_C4,
+  NOTE_G4, NOTE_G4, NOTE_G5,
+  NOTE_E4, NOTE_C4, NOTE_C4,
+  NOTE_B4, NOTE_A4, NOTE_F4,
+  NOTE_F4, NOTE_E4, NOTE_C4,
+  NOTE_D4, NOTE_C4
 };
 //Mario main them tempo
 int tempo3[] = {
-  8, 13, 12, 9,
-  8, 13, 12, 9,
-  8, 13, 12, 9,
-  8, 13, 12, 9,
-  8,
-  5, 5, 13, 12,
-  5, 5, 13, 12,
-  5
+  12,12,5, 
+  8,8,2, 
+  12,12,5, 
+  8,8,2,
+  12,12,5,
+  6,8,8,
+  6,2,8,
+  8,5,6,
+  8,2
+  
 };
 
 void setup() {
@@ -210,7 +216,10 @@ void loop() {
     ledPin3State = false;
     digitalWrite(ledPin3, LOW);
   }
-
+  
+  if(ledPinState == LOW && ledPin2State==LOW && ledPin3State == LOW ){
+     resetFunc();
+  }
 }
 
 void sing() {
@@ -285,6 +294,7 @@ void buzz(int targetPin, long frequency, long length) {
 void pinWin(int s){
   digitalWrite(ledPin, ledPinState ? HIGH : LOW);
   digitalWrite(ledPin2, ledPin2State ? HIGH : LOW);
+  digitalWrite(ledPin3, ledPin3State ? HIGH : LOW);
   
   s==1?sing():s==2?sing2():sing3();
   delay(5000);
@@ -292,6 +302,7 @@ void pinWin(int s){
   ledGoState = 0;
   digitalWrite(ledPin, LOW);
   digitalWrite(ledPin2, LOW);
+  digitalWrite(ledPin3, LOW);
   digitalWrite(ledGo, LOW);
   randNumber = random(3000,10000);
   randomDelay = randNumber;
